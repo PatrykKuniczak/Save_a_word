@@ -1,4 +1,5 @@
-from functionality import Word
-import sqlite3
+from functionality import Word, Manual_Translate, Automatic_Translate,\
+    data_base_decorator
 
-_all_ = ["Word", "sqlite3"]
+_all_ = ["Word", "Manual_Translate", "Automatic_Translate",
+         "data_base_decorator"]
