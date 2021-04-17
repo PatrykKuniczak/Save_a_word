@@ -10,27 +10,19 @@ class Word:
         :param connection: Take a connection from data_base_decorator argument "connection"
         :param cursor: Take a cursor from data_base_decorator argument "cursor"
         """
-        self.word = word
+        self.word = word.capitalize()
         self.cursor = cursor
         self.connection = connection
 
-    def word_valid(self):
-        return True
-
     def add_word(self) -> str:
-        if self.word_valid():
-            with self.connection:
-                self.cursor.execute("INSERT INTO words VALUES (:base_word ,:translated_word)",
-                                    {"base_word": self.word, "translated_word": "Word"})
+        with self.connection:
+            self.cursor.execute("INSERT INTO words VALUES (:base_word ,:translated_word)",
+                                {"base_word": self.word, "translated_word": "Word"})
 
-                self.cursor.execute("SELECT * FROM words WHERE base_word=:base_word",
-                                    {"base_word":self.word})
+            self.cursor.execute("SELECT * FROM words WHERE base_word=:base_word",
+                                {"base_word":self.word})
 
-            return f"Dodano pomyślnie słówko {list(self.cursor.fetchone())[0]}, tłumaczenie:{list(self.cursor.fetchone())[1]}"
-
-        else:
-
-            return "Nie udało się dodać słówka"
+        return f"Dodano pomyślnie słówko {list(self.cursor.fetchone())[0]}, tłumaczenie:{list(self.cursor.fetchone())[1]}"
 
     def edit_word(self) -> None:
         pass
