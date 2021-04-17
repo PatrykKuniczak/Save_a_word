@@ -2,7 +2,13 @@ import sqlite3
 
 
 class Word:
+
     def __init__(self, word, cursor):
+        """
+
+        :param word: Take a word from user
+        :param cursor: Take a cursor from @data_base_decorator argument "cursor"
+        """
         self.word = word
         self.cursor = cursor
 
@@ -29,11 +35,15 @@ class Automatic_Translate:
 
 
 def data_base_decorator(func):
+    """This decorator open and close connection with sqlite3 data base
+    :param - func, have two arguments it's 'cursor' and 'connection' from data base
+    """
     def wrapper():
         connection = sqlite3.connect("Local_words.db")
         cursor = connection.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS words ()""")# TODO: DOKOŃCZ
-        func(cursor)
+        cursor.execute("""CREATE TABLE IF NOT EXISTS words (base_word TEXT,
+                        translated_word TEXT)""")
+        func(connection, cursor)
         connection.close()
 
     return wrapper
