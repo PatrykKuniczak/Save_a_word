@@ -1,8 +1,0 @@
-../.idea
-.cfg
-Include
-Lib
-Scripts
-pyvenv.cfg
-.so
-.xml
