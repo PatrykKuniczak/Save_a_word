@@ -35,10 +35,9 @@ class Word:
         :param new_data_value: New value for chosen data
         :return: String that told the user that the edition was successful
         """
-        new_data_value = old_data_value.capitalize()
-
+        new_data_value = new_data_value.capitalize()
         self.cursor.execute("SELECT * FROM words")
-        if old_data_value in self.cursor.fetchall()[0] or self.cursor.fetchall()[1]:
+        if old_data_value in list(self.cursor.fetchall()):
             with self.connection:
                 self.cursor.execute(f"UPDATE words SET {row_value}= :new_data WHERE :old_data ",
                                     {"new_data": new_data_value, "old_data": old_data_value})
@@ -51,8 +50,20 @@ class Word:
         else:
             return "Podana wartość nie znajduje się w bazie słówek!"
 
-    def delete_word(self) -> None:
-        pass
+    def delete_word(self, data_for_del: str) -> str:
+        data_for_del = data_for_del.capitalize()
+
+        self.cursor.execute("SELECT * FROM words")
+        print(self.cursor.fetchall()[0])
+        if data_for_del in self.cursor.fetchall():
+            with self.connection:
+                self.cursor.execute("DELETE from words WHERE base_word=:data_for_del OR translated_word=:data_for_del",
+                                    {"data_for_del": data_for_del})
+
+            return f"Słowo {data_for_del} zostało usunięte"
+
+        else:
+            return "Podana wartość nie znajduje się w bazie słówek!"
 
 
 class Manual_Translate:
