@@ -3,13 +3,21 @@ import sqlite3
 
 class Word:
 
-    def __init__(self, connection, cursor) -> None:
+    def __init__(self, connection, cursor, base_language: str, foreign_language: str) -> None:
         """
         :param connection: Take a connection from data_base_decorator argument "connection"
         :param cursor: Take a cursor from data_base_decorator argument "cursor"
+        :param base_language: It is a language from which the user translating
+        :param foreign_language: It is a language in which the user translating
         """
         self.connection = connection
         self.cursor = cursor
+        self.base_language = base_language.capitalize()
+        self.foreign_language = foreign_language.capitalize()
+        self.languages = self.base_language + "_" + self.foreign_language
+
+        cursor.execute(f"""CREATE TABLE IF NOT EXISTS {self.languages} (base_word TEXT,
+                        translated_word TEXT)""")
 
     def add_word(self, word: str) -> str:
         """
@@ -81,10 +89,8 @@ def data_base_decorator(func):
     """
 
     def wrapper():
-        connection = sqlite3.connect("Local_words.db")
+        connection = sqlite3.connect("Words.db")
         cursor = connection.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS words (base_word TEXT,
-                        translated_word TEXT)""")
 
         func(connection, cursor)
         connection.close()
