@@ -7,6 +7,7 @@ Window {
     id: main_window
     width: 1000
     height: 580
+
     visible: true
     color: "#00000000"
     title: qsTr("Save a word")
@@ -22,7 +23,7 @@ Window {
                 windowStatus = 1
                 windowMargin = 0
                 maximize.btnIconSource ="../images/svg_images/restore_icon.svg"
-                main_window.showMaximized()
+                main_window.showNormal()
             }else{
                 main_window.showNormal()
                 windowStatus = 0
@@ -214,29 +215,63 @@ Window {
 
                         LeftMenuBtn {
                             id: description
-                            text: "Description"
+                            text: "Opis aplikacji"
                             btnIconSource: "../images/svg_images/home_icon.svg"
                             onClicked: {
-                                working.isActive = false
+                                create_table.isActive = false
+                                add_words.isActive = false
                                 info.isActive = false
                                 description.isActive = true
                                 stackView.push(Qt.resolvedUrl("pages/descriptionPage.qml"))
                             }
 
                         }
-
                         LeftMenuBtn {
-                            id: working
-                            text: "Generate"
+                            id: create_table
+                            text: "Utwórz tabelę"
                             anchors.top: description.bottom
                             isActive: false
-                            btnIconSource: "../images/svg_images/working_icon.svg"
+                            btnIconSource: "../images/svg_images/table_icon.svg"
                             anchors.topMargin: 0
                             onClicked: {
                                 description.isActive = false
+                                add_words.isActive = false
                                 info.isActive = false
-                                working.isActive = true
-                                stackView.push(Qt.resolvedUrl("pages/workingPage.qml"))
+                                create_table.isActive = true
+                                stackView.push(Qt.resolvedUrl("pages/createPage.qml"))
+                            }
+                        }
+
+                        LeftMenuBtn {
+                            id: add_words
+                            text: "Dodaj słowo"
+                            anchors.top: create_table.bottom
+                            isActive: false
+                            btnIconSource: "../images/svg_images/plus_left_icon.svg"
+                            anchors.topMargin: 0
+                            onClicked: {
+                                description.isActive = false
+                                create_table.isActive = false
+                                info.isActive = false
+                                add_words.isActive = true
+                                stackView.push(Qt.resolvedUrl("pages/addPage.qml"))
+                            }
+
+                        }
+                        LeftMenuBtn {
+                            id: export_btn
+                            text: "Eksportuj do CSV"
+                            anchors.top: add_words.bottom
+                            isActive: false
+                            btnIconSource: "../images/svg_images/export_icon.svg"
+                            anchors.topMargin: 0
+                            onClicked: {
+                                description.isActive = false
+                                create_table.isActive = false
+                                info.isActive = false
+                                add_words.isActive = false
+                                export_btn.isActive = true
+                                stackView.push(Qt.resolvedUrl("pages/exportPage.qml"))
                             }
 
                         }
@@ -272,6 +307,12 @@ Window {
                     anchors.leftMargin: 0
                     anchors.bottomMargin: 0
                     anchors.topMargin: 0
+                    StackView {
+                        id: stackView
+                        anchors.fill: parent
+                        initialItem: Qt.resolvedUrl("pages/descriptionPage.qml")
+                    }
+
                 }
             }
 

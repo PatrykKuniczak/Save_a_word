@@ -1,0 +1,30 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtGraphicalEffects 1.5
+
+Button{
+    id: btnToggle
+
+    implicitWidth: 70
+    implicitHeight: 60
+
+    background: Rectangle{
+        id: background_button
+        color: "#25273b"
+        Image {
+            id: button_icon
+            source: "../../images/svg_images/menu_icon.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 25
+            width: 25
+            fillMode: Image.PreserveAspectFit
+        }
+        
+        ColorOverlay{
+            anchors.fill: button_icon
+            source: button_icon
+            color: "#ff"
+        }
+    }
+}
