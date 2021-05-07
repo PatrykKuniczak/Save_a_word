@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from Main_Logic import Manual_Translate, Language, Base
+from Main_Logic import Manual_Translate, Language, Base, Word
 import os
 
 
@@ -22,7 +22,19 @@ class TestWord(TestCase):
         self.manual = Manual_Translate(self.first_lang.id, self.second_lang.id)
 
     def test_add_word(self) -> None:
-        self.assertEqual(self.manual.add_word("Jaśko", "Bogdanowicz"), "Jaśko")
+        base_word = "Jaśko".title()
+        translated_word = "Bogdanowicz".title()
+
+        new_base_word = base_word
+        new_translated_word = translated_word
+
+        test_word = Word(base_word=new_base_word, translated_word=new_translated_word, base_language_id=self.first_lang.id,
+                         foreign_language_id=self.second_lang.id)
+
+        self.session.add(test_word)
+        self.session.commit()
+
+        self.assertEqual(self.manual.add_word(base_word, translated_word), False)
 
     def tearDown(self) -> None:
         self.session.close()

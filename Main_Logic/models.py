@@ -20,24 +20,25 @@ class Language(Base):
 
 class Word(Base): 
     """
-        This table have a row:
-        - id (Primary)
-        - base_word,
-        - base_language,
-        - translated_language,
-        - foreign_language.
-        """
+    This table have a row:
+
+    - id (Primary)
+    - base_word,
+    - base_language_id,
+    - translated_word,
+    - foreign_language_id.
+    """
     __tablename__ = 'words'
 
     id = Column(Integer, primary_key=True)
 
     base_word = Column(String(100), unique=True)
-    base_language = Column(Integer, ForeignKey('languages.id'))
-    base_language_relation = relationship(Language, foreign_keys=[base_language])
+    base_language_id = Column(Integer, ForeignKey('languages.id'))
+    base_language_relation = relationship(Language, foreign_keys=[base_language_id])
 
     translated_word = Column(String(100), unique=True)
-    foreign_language = Column(Integer, ForeignKey('languages.id'))
-    foreign_language_relation = relationship(Language, foreign_keys=[foreign_language])
+    foreign_language_id = Column(Integer, ForeignKey('languages.id'))
+    foreign_language_relation = relationship(Language, foreign_keys=[foreign_language_id])
 
 
 if __name__ == "__main__":

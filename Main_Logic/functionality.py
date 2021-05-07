@@ -10,64 +10,61 @@ class Manual_Translate:
         :param foreign_language_id: It's id of language in which the user translating.
         """
         self.session = Manual_Translate._session
-        self.base_language = base_language_id
-        self.foreign_language = foreign_language_id
+        self.base_language_id = base_language_id
+        self.foreign_language_id = foreign_language_id
 
-    def add_word(self, base_word: str, translated_word: str) -> str:
+    def add_word(self, base_word: str, translated_word: str) -> [tuple[str, str]]:
         """
-        :param base_word: This is a word from first(base) language.
-        :param translated_word: This is a word from second(foreign) language.
-        :return
+        If one of this words is into data base this value becomes "None".
+
+        If the both words is into data base return False.
+
+        :param base_word: This is a word for translate.
+        :param translated_word: This is a word after translate.
+        :return: tuple(base_word / None, translated_word / None) or False (Read higher).
         """
 
         base_word = base_word.title()
         translated_word = translated_word.title()
 
-        base_language_checkout = self.session.query(Language).filter(Language.id == self.base_language).first()
-        foreign_language_checkout = self.session.query(Language).filter(Language.id == self.foreign_language).first()
+        base_word_checkout = self.session.query(Word).filter(Word.base_word == base_word).first()
+        translated_word_checkout = self.session.query(Word).filter(Word.translated_word == translated_word).first()
 
-        if base_language_checkout and foreign_language_checkout is not None:
-            word = Word(base_word=base_word, base_language=self.base_language,
-                        translated_word=translated_word, foreign_language=self.foreign_language)
+        if base_word_checkout is None and translated_word_checkout is None:
+            word = Word(base_word=base_word, base_language_id=self.base_language_id,
+                        translated_word=translated_word, foreign_language_id=self.foreign_language_id)
 
             self.session.add(word)
 
             search = self.session.query(Word).filter(Word.base_word == base_word).first()
 
-            return search.base_word
+            return search.base_word, search.translated_word
 
         else:
-            return "Wybrany język nie znajduje się na liście!"
+            if base_word_checkout is None:
+                return None, translated_word
 
-        # searching = Session.query(Word).filter(Word.base_word == base_word).first()
+            elif translated_word_checkout is None:
+                return base_word, None
 
-        # print(searching.base_word)
+            else:
+                return False
 
-        # self.cursor.execute("SELECT base_word FROM words WHERE base_word=:base_word AND
-        # base_language_checkout=:base_language_checkout", {"base_word": base_word, "base_language_checkout":
-        # self.base_language_checkout})
-
-        # if not self.cursor.fetchone(): with self.connection: self.cursor.execute("INSERT INTO words VALUES (
-        # :base_word ,:translated_word," ":base_language_checkout, :foreign_language_checkout)", {"base_word":
-        # base_word, "translated_word": translated_word, "base_language_checkout": self.base_language_checkout,
-        # "foreign_language_checkout": self.foreign_language_checkout})
-
-        #     return f"Pomyślnie dodano słówko '{base_word} - {translated_word}'"
-
-        # else:
-        #     return f"Podane słowo '{base_word} - {translated_word}' znajduję się już w bazie słówek"
+    def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> str:
+        """
+        :param row_value: Name of data base row 'base_word' or 'translated_word'.
+        :param old_data_value: Actual word value.
+        :param new_data_value: New word value.
+        :return:
+        """
+        old_data_checkout = self.session.query(Word).filter(Word.row_value == self.base_language_id).first()
 
     # def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> str:
-    #     """
-    #     :param row_value: Name of data base row 'base_word' or 'translated_word'.
-    #     :param old_data_value: Actual value for chosen data.
-    #     :param new_data_value: New value for chosen data.
-    #     :return:
-    #     """
+    #
     #     new_data_value = new_data_value.title()
     #
-    #     self.cursor.execute("SELECT base_word FROM words WHERE base_word=:base_word AND base_language=:base_language",
-    #                         {"base_word": base_word, "base_language": self.base_language})
+    # self.cursor.execute("SELECT base_word FROM words WHERE base_word=:base_word AND
+    # base_language_id=:base_language_id", {"base_word": base_word, "base_language_id": self.base_language_id})
     #
     #     if old_data_value in list(self.cursor.fetchall()):
     #         with self.connection:
