@@ -13,7 +13,9 @@ class Manual_Translate:
         self.base_language_id = base_language_id
         self.foreign_language_id = foreign_language_id
 
-    def add_word(self, base_word: str, translated_word: str) -> [tuple[str, str]]:
+    def add_word(self, base_word: str, translated_word: str) -> [tuple[str, str]] or [tuple[None, str]] \
+                                                                or [tuple[str, None]] or False:
+
         """
         If one of this words is into data base this value becomes "None".
 
@@ -50,14 +52,27 @@ class Manual_Translate:
             else:
                 return False
 
-    def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> str:
+    def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> tuple[str, str] or False:
         """
         :param row_value: Name of data base row 'base_word' or 'translated_word'.
         :param old_data_value: Actual word value.
         :param new_data_value: New word value.
         :return:
         """
-        old_data_checkout = self.session.query(Word).filter(Word.row_value == self.base_language_id).first()
+
+        old_data_checkout = self.session.query(Word).filter(Word.base_word == old_data_value).first()
+
+        if old_data_checkout is not None:
+            search_data = self.session.query(Word).filter(Word.base_word == old_data_value).first()
+            search_data.base_word = new_data_value
+
+            new_data_checkout = self.session.query(Word).filter(Word.base_word == new_data_value).first()
+
+            if new_data_checkout.base_word == new_data_value:
+                return old_data_value, new_data_value
+
+        else:
+            return False
 
     # def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> str:
     #
