@@ -39,13 +39,18 @@ class TestWord(TestCase):
         self.session.add(test_word)
         self.session.commit()
 
-        self.assertEqual(self.manual.add_word(base_word, translated_word), (None, None))
+        self.assertEqual(self.manual.add_word(base_word, translated_word), False)
 
     def test_edit_word(self) -> None:
         old_value = "Jaśko".title()
         new_value = "Bogdan".title()
 
-        self.assertEqual(self.manual.edit_word("base_word", old_value, new_value), (old_value, new_value))
+        self.assertEqual(self.manual.edit_word(old_value, new_value), (old_value, new_value))
+
+    # def test_delete_word(self) -> None:
+    #     data_for_del = "Jaśko".title()
+    #
+    #     self.assertEqual(self.manual.delete_word(data_for_del), data_for_del)
 
     @classmethod
     def tearDownClass(cls) -> None:

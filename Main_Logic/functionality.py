@@ -1,4 +1,8 @@
-from Main_Logic import Word, Session, Language
+from Main_Logic import Word, Session
+from sqlalchemy import or_
+from logging import basicConfig, DEBUG, exception
+
+basicConfig(filename="logging.log", level=DEBUG, format='\n %(asctime)s:%(levelname)s:%(message)s')
 
 
 class Manual_Translate:
@@ -13,17 +17,17 @@ class Manual_Translate:
         self.base_language_id = base_language_id
         self.foreign_language_id = foreign_language_id
 
-    def add_word(self, base_word: str, translated_word: str) -> [tuple[str, str]] or [tuple[None, str]] \
-                                                                or [tuple[str, None]] or False:
+    def add_word(self, base_word: str, translated_word: str) -> [tuple[str or None, str or None]] or False:
 
         """
-        If one of this words is into data base this value becomes "None".
+        If one of this words is in data base this value becomes "None".
 
-        If the both words is into data base return False.
+        If the both words is in data base return False.
 
         :param base_word: This is a word for translate.
         :param translated_word: This is a word after translate.
-        :return: tuple(base_word / None, translated_word / None) or False (Read higher).
+        :return: tuple(base_word/ None, translated_word/ None) [When None, this data is in data base. Read higher]
+        or False when data is in data base.
         """
 
         base_word = base_word.title()
@@ -52,57 +56,62 @@ class Manual_Translate:
             else:
                 return False
 
-    def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> tuple[str, str] or False:
+    def edit_word(self, old_data_value: str, new_data_value: str) -> tuple[str, str] or False:
         """
-        :param row_value: Name of data base row 'base_word' or 'translated_word'.
         :param old_data_value: Actual word value.
         :param new_data_value: New word value.
-        :return:
+        :return: tuple(base_word, translated_word) or False when editing isn't success
+        or None when searching(old_data_value) data isn't on data base
         """
 
-        old_data_checkout = self.session.query(Word).filter(Word.base_word == old_data_value).first()
+        data_base_record = self.session.query(Word).filter(or_(Word.base_word == old_data_value,
+                                                               Word.translated_word == old_data_value)).first()
 
-        if old_data_checkout is not None:
-            search_data = self.session.query(Word).filter(Word.base_word == old_data_value).first()
-            search_data.base_word = new_data_value
+        if data_base_record is not None:
+            row_value = ""
+            if data_base_record.base_word == old_data_value:
+                row_value = "base_word"
 
-            new_data_checkout = self.session.query(Word).filter(Word.base_word == new_data_value).first()
+            elif data_base_record.translated_word == old_data_value:
+                row_value = "translated_word"
 
-            if new_data_checkout.base_word == new_data_value:
-                return old_data_value, new_data_value
+            try:
+                setattr(data_base_record, row_value, new_data_value)
+
+                update_checkout = self.session.query(Word).filter(or_(Word.base_word == new_data_value,
+                                                                      Word.translated_word == new_data_value)).first()
+            except AttributeError as attrerror:
+                exception(str(attrerror))
+
+            else:
+                if update_checkout is not None:
+                    return old_data_value, new_data_value
+
+                else:
+                    return False
+        else:
+            return None
+
+    def delete_word(self, data_for_del: str):
+        """
+
+        :param data_for_del: This value is data for deleting
+        :return: data_for_del when deleting is successful or None while data_for_del isn't in data base
+        """
+        data_base_record = self.session.query(Word).filter(or_(Word.base_word == data_for_del,
+                                                               Word.translated_word == data_for_del)).first()
+        if data_base_record is not None:
+
+            self.session.delete(data_base_record)
+
+            return data_for_del
 
         else:
-            return False
+            return None
 
-    # def edit_word(self, row_value: str, old_data_value: str, new_data_value: str) -> str:
-    #
-    #     new_data_value = new_data_value.title()
-    #
-    # self.cursor.execute("SELECT base_word FROM words WHERE base_word=:base_word AND
-    # base_language_id=:base_language_id", {"base_word": base_word, "base_language_id": self.base_language_id})
-    #
-    #     if old_data_value in list(self.cursor.fetchall()):
-    #         with self.connection:
-    #             self.cursor.execute(f"UPDATE words SET {row_value}= :new_data WHERE :old_data ",
-    #                                 {"new_data": new_data_value, "old_data": old_data_value})
-    #
-    #         return f"Wartość {old_data_value}, została zmieniona na: {new_data_value}"
-    #
-    #     else:
-    #         return "Podana wartość nie znajduje się w bazie słówek!"
-    #
-    # # TODO: EDIT_LANGUAGE KIEDY UŻYTKOWNIK WYBRAŁ BY ZŁY JĘZYK, TO DAĆ MU NAST. ROZWIJANĄ LISTĘ W ZAAWANSOWANY OPCJACH
-    # def delete_word(self, data_for_del: str) -> str:
-    #     data_for_del = data_for_del.title()
-    #
-    # self.cursor.execute("SELECT * FROM words") print(self.cursor.fetchall()[0]) if data_for_del in
-    # self.cursor.fetchall(): with self.connection: self.cursor.execute("DELETE from words WHERE
-    # base_word=:data_for_del OR translated_word=:data_for_del", {"data_for_del": data_for_del})
-    #
-    #         return f"Słowo {data_for_del} zostało usunięte"
-    #
-    #     else:
-    #         return "Podana wartość nie znajduje się w bazie słówek!"
+    # TODO: EDIT_LANGUAGE KIEDY UŻYTKOWNIK WYBRAŁ BY ZŁY JĘZYK, TO DAĆ MU NAST. ROZWIJANĄ LISTĘ W ZAAWANSOWANY OPCJACH
+    def edit_language(self):
+        pass
 
 
 class Automatic_Translate:
