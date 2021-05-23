@@ -5,12 +5,14 @@ from Main_Logic import Base, Engine
 
 class Language(Base):
     """
-       This table have a row:
 
-       - id: (Primary)
-       - name: This param take a language name.
-       - code: This param take a language shortcut e.g. "en".
-       """
+    This table have a row:
+
+    - id: (Primary)
+    - name: This is language name e.g. "English".
+    - code: This is language shortcut e.g. "en".
+    """
+
     __tablename__ = 'languages'
 
     id = Column(Integer, primary_key=True)
@@ -20,14 +22,16 @@ class Language(Base):
 
 class Word(Base): 
     """
+
     This table have a row:
 
-    - id (Primary)
-    - base_word,
-    - base_language_id,
-    - translated_word,
-    - foreign_language_id.
+    - id: (Primary)
+    - base_word: This is a word from which we're translating
+    - base_language_id: Id from Language table,
+    - translated_word: This is a word in which we're translating,
+    - foreign_language_id: Id from Language table.
     """
+
     __tablename__ = 'words'
 
     id = Column(Integer, primary_key=True)
