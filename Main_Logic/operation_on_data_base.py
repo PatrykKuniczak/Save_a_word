@@ -34,8 +34,7 @@ def create_languages(Language_Class=Language) -> None:
     :param Language_Class: This param take a reference to Language table class.
     """
 
-    first_language = Language_Class(language="Polski", language_shortcut="pl")
-    second_language = Language_Class(language="Angielski", language_shortcut="en")
+    first_language = Language_Class(name="Polski", code="pl")
+    second_language = Language_Class(name="Angielski", code="en")
 
     Session.add_all([first_language, second_language])
-    Session.commit()

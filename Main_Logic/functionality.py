@@ -1,4 +1,4 @@
-from Main_Logic import Word, Session
+from Main_Logic import Word, Session, Language
 from sqlalchemy import or_
 from logging import basicConfig, DEBUG, exception
 
@@ -60,8 +60,8 @@ class Manual_Translate:
         """
         :param old_data_value: Actual word value.
         :param new_data_value: New word value.
-        :return: tuple(base_word, translated_word) or False when editing isn't success
-        or None when searching(old_data_value) data isn't on data base
+        :return: tuple(base_word, translated_word) while is successful otherwise False
+        or None when searching(old_data_value) data isn't on data base.
         """
 
         data_base_record = self.session.query(Word).filter(or_(Word.base_word == old_data_value,
@@ -78,12 +78,13 @@ class Manual_Translate:
             try:
                 setattr(data_base_record, row_value, new_data_value)
 
-                update_checkout = self.session.query(Word).filter(or_(Word.base_word == new_data_value,
-                                                                      Word.translated_word == new_data_value)).first()
             except AttributeError as attrerror:
                 exception(str(attrerror))
 
             else:
+                update_checkout = self.session.query(Word).filter(or_(Word.base_word == new_data_value,
+                                                                      Word.translated_word == new_data_value)).first()
+
                 if update_checkout is not None:
                     return old_data_value, new_data_value
 
@@ -96,7 +97,7 @@ class Manual_Translate:
         """
 
         :param data_for_del: This value is data for deleting
-        :return: data_for_del when deleting is successful or None while data_for_del isn't in data base
+        :return: str of deleting data when deleting is successful or None while data_for_del isn't in data base
         """
         data_base_record = self.session.query(Word).filter(or_(Word.base_word == data_for_del,
                                                                Word.translated_word == data_for_del)).first()
@@ -109,9 +110,46 @@ class Manual_Translate:
         else:
             return None
 
-    # TODO: EDIT_LANGUAGE KIEDY UŻYTKOWNIK WYBRAŁ BY ZŁY JĘZYK, TO DAĆ MU NAST. ROZWIJANĄ LISTĘ W ZAAWANSOWANY OPCJACH
-    def edit_language(self):
-        pass
+    def edit_language(self, word_id,  old_language, new_language) -> tuple[str, str] or False:
+        """
+
+        :param word_id: This value is a id of word
+        :param old_language: This value is string of old data from language label.
+        :param new_language: This value is string of new data from language label.
+        :return: The tuple(old_language, new_language) if editing is successful, otherwise return False
+        or None when searching(old_data_value) data isn't on data base.
+        """
+        old_language_record_id = self.session.query(Language).filter(Language.name == old_language).first().id
+
+        if old_language_record_id is not None:
+            row_value = ""
+            if old_language_record_id == self.base_language_id:
+                row_value = "base_language_id"
+
+            elif old_language_record_id == self.foreign_language_id:
+                row_value = "foreign_language_id"
+
+            try:
+                new_language_record_id = self.session.query(Language).filter(Language.name ==
+                                                                             new_language).first().id
+
+                main_object = self.session.query(Word).filter(Word.id == word_id).first()
+
+                setattr(main_object, row_value, new_language_record_id)
+
+            except AttributeError as attrerror:
+                exception(str(attrerror))
+
+            else:
+                update_checkout = self.session.query(Word).filter(Word.id == word_id).first()
+                if update_checkout is not None:
+                    return old_language, new_language
+
+                else:
+                    return False
+
+        else:
+            return None
 
 
 class Automatic_Translate:
