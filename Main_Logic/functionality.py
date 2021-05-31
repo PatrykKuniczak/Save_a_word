@@ -1,5 +1,6 @@
 from Main_Logic import Word, Session, Language
 from sqlalchemy import or_
+# from PyDictionary import PyDictionary
 
 
 class Manual_Translate:
@@ -41,9 +42,9 @@ class Manual_Translate:
 
             self.session.add(word)
 
-            record_checkout = self.session.query(Word).filter(Word.base_word == base_word).first()
+            word_record = self.session.query(Word).filter(Word.base_word == base_word).first()
 
-            return [record_checkout.base_word, record_checkout.translated_word]
+            return [word_record.base_word, word_record.translated_word]
 
         else:
             if base_word_checkout is None:
@@ -81,7 +82,7 @@ class Manual_Translate:
 
             setattr(data_base_record, row_value, new_data_value)
 
-            update_checkout = self.session.query(Word).filter(or_(Word.base_word == new_data_value))
+            update_checkout = self.session.query(Word).filter(Word.base_word == new_data_value).first()
 
             if update_checkout is not None:
                 return [old_data_value, new_data_value]
@@ -100,10 +101,10 @@ class Manual_Translate:
         """
 
         data_for_del = data_for_del.title()
-        data_base_record = self.session.query(Word).filter(or_(Word.base_word == data_for_del,
-                                                               Word.translated_word == data_for_del)).first()
-        if data_base_record is not None:
-            self.session.delete(data_base_record)
+        word_record = self.session.query(Word).filter(or_(Word.base_word == data_for_del,
+                                                          Word.translated_word == data_for_del)).first()
+        if word_record is not None:
+            self.session.delete(word_record)
             return data_for_del
 
         else:
@@ -135,13 +136,13 @@ class Manual_Translate:
 
             new_language_record_id = self.session.query(Language).filter(Language.name == new_language).first().id
 
-            main_object = self.session.query(Word).filter(Word.id == word_id).first()
+            word_record = self.session.query(Word).filter(Word.id == word_id).first()
 
-            setattr(main_object, row_value, new_language_record_id)
+            setattr(word_record, row_value, new_language_record_id)
 
-            update_checkout = self.session.query(Word).filter(Word.id == word_id).first()
+            update_record_checkout = self.session.query(Word).filter(Word.id == word_id).first()
 
-            if update_checkout is not None:
+            if update_record_checkout is not None:
                 return [old_language, new_language]
 
             else:
@@ -151,5 +152,13 @@ class Manual_Translate:
             return None
 
 
-class Automatic_Translate:
+class Automatic_Translate(Manual_Translate):
     pass
+#     def __init__(self, base_language_id: int, foreign_language_id: int):
+#         super().__init__(base_language_id, foreign_language_id)
+#         self.dictionary = PyDictionary()
+#
+#     def add_word(self, base_word: str, **kwargs) -> list[str or None, str or None] or False:
+#         language_record = self.session.query(Language).filter(Language.id == self.foreign_language_id).first()
+#
+#         super().add_word(base_word, translated_word)
