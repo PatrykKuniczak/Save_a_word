@@ -1,6 +1,6 @@
 from Main_Logic import Word, Session, Language
 from sqlalchemy import or_
-# from PyDictionary import PyDictionary
+from PyDictionary import PyDictionary
 
 
 class Manual_Translate:
@@ -16,6 +16,7 @@ class Manual_Translate:
         self.session = Manual_Translate._session
         self.base_language_id = base_language_id
         self.foreign_language_id = foreign_language_id
+        self.dictionary = PyDictionary()
 
     def add_word(self, base_word: str, translated_word: str) -> list[str or None, str or None] or False:
         """
@@ -59,7 +60,7 @@ class Manual_Translate:
     def edit_word(self, old_data_value: str, new_data_value: str) -> list[str, str] or False:
         """
 
-        When editing was successful function return list of the both words, otherwise return False.
+        When editing was successful function return list of the both words.
 
             When input data isn't on data base function return None.
 
@@ -73,7 +74,8 @@ class Manual_Translate:
                                                                Word.translated_word == old_data_value)).first()
 
         if data_base_record is not None:
-            row_value = ""
+            row_value = str
+
             if data_base_record.base_word == old_data_value:
                 row_value = "base_word"
 
@@ -82,17 +84,12 @@ class Manual_Translate:
 
             setattr(data_base_record, row_value, new_data_value)
 
-            update_checkout = self.session.query(Word).filter(Word.base_word == new_data_value).first()
+            return [old_data_value, new_data_value]
 
-            if update_checkout is not None:
-                return [old_data_value, new_data_value]
-
-            else:
-                return False
         else:
             return None
 
-    def delete_word(self, data_for_del: str):
+    def delete_word(self, data_for_del: str) -> str or None:
         """
 
         :param data_for_del: This value is data for deleting.
@@ -113,9 +110,12 @@ class Manual_Translate:
     def edit_language(self, word_id: int, old_language: str, new_language: str) -> list[str, str] or False:
 
         """
-        When editing was successful function return list of the both languages, otherwise return False.
+        When editing was successful function return list of the both languages.
 
-            When input data isn't on data base function return None.
+            False when the new_language is the same of opposite language (ep. user editing base_language for 'polish'
+            but foreign_language value is 'polish').
+
+                When input data isn't on data base function return None.
 
         :param word_id: This value is a id of word
         :param old_language: This value is string of old data from language label.
@@ -127,29 +127,53 @@ class Manual_Translate:
         old_language_record_id = self.session.query(Language).filter(Language.name == old_language).first().id
 
         if old_language_record_id is not None:
-            row_value = ""
-            if old_language_record_id == self.base_language_id:
-                row_value = "base_language_id"
-
-            elif old_language_record_id == self.foreign_language_id:
-                row_value = "foreign_language_id"
-
-            new_language_record_id = self.session.query(Language).filter(Language.name == new_language).first().id
+            row_value = str
 
             word_record = self.session.query(Word).filter(Word.id == word_id).first()
 
-            setattr(word_record, row_value, new_language_record_id)
+            opposite_language_id = int
 
-            update_record_checkout = self.session.query(Word).filter(Word.id == word_id).first()
+            if old_language_record_id == self.base_language_id:
+                row_value = "base_language_id"
+                opposite_language_id = word_record.foreign_language_id
 
-            if update_record_checkout is not None:
+            elif old_language_record_id == self.foreign_language_id:
+                row_value = "foreign_language_id"
+                opposite_language_id = word_record.base_language_id
+
+            new_language_record_id = self.session.query(Language).filter(Language.name == new_language).first().id
+
+            if new_language_record_id != opposite_language_id:
+
+                setattr(word_record, row_value, new_language_record_id)
+
                 return [old_language, new_language]
 
             else:
                 return False
-
         else:
             return None
+
+    @classmethod
+    def display_word_list(cls) -> dict:
+        """
+
+        :return: Dictionary with each record {word_id: [base_word, translated_word, base_language, foreign_language]}
+        """
+        cls.session = Manual_Translate._session
+
+        words = cls.session.query(Word).all()
+
+        main_dictionary = {}
+
+        for word in words:
+            base_language = cls.session.query(Language).filter(Language.id == word.base_language_id).first().name
+            foreign_language = cls.session.query(Language).filter(Language.id == word.foreign_language_id).first().name
+
+            main_dictionary[word.id] = \
+                [word.base_word, word.translated_word, base_language, foreign_language]
+
+        return main_dictionary
 
 
 class Automatic_Translate(Manual_Translate):
