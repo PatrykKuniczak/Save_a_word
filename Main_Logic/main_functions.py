@@ -1,6 +1,5 @@
 from Main_Logic import Word, Session, Language
 from sqlalchemy import or_
-from PyDictionary import PyDictionary
 
 
 class Manual_Translate:
@@ -16,7 +15,6 @@ class Manual_Translate:
         self.session = Manual_Translate._session
         self.base_language_id = base_language_id
         self.foreign_language_id = foreign_language_id
-        self.dictionary = PyDictionary()
 
     def add_word(self, base_word: str, translated_word: str) -> list[str or None, str or None] or False:
         """
@@ -117,11 +115,11 @@ class Manual_Translate:
 
                 When input data isn't on data base function return None.
 
-        :param word_id: This value is a id of word
+        :param word_id: This value is a id of word.
         :param old_language: This value is string of old data from language label.
         :param new_language: This value is string of new data from language label.
 
-        :return: List [old_language, new_language]
+        :return: List [old_language, new_language].
         """
 
         old_language_record_id = self.session.query(Language).filter(Language.name == old_language).first().id
@@ -151,29 +149,64 @@ class Manual_Translate:
 
             else:
                 return False
+
         else:
             return None
 
-    @classmethod
-    def display_words_list(cls) -> dict:
+    @staticmethod
+    def display_words_list() -> dict:
         """
 
-        :return: Dictionary with each record {word_id: [base_word, translated_word, base_language, foreign_language]}
+        :return: Dictionary with each record {word_id: [base_word, translated_word, base_language, foreign_language]}.
         """
-        cls.session = Manual_Translate._session
+        session = Manual_Translate._session
 
-        words = cls.session.query(Word).all()
+        words = session.query(Word).all()
 
         main_dictionary = {}
 
         for word in words:
-            base_language = cls.session.query(Language).filter(Language.id == word.base_language_id).first().name
-            foreign_language = cls.session.query(Language).filter(Language.id == word.foreign_language_id).first().name
+            base_language = session.query(Language).filter(Language.id == word.base_language_id).first().name
+            foreign_language = session.query(Language).filter(Language.id == word.foreign_language_id).first().name
 
             main_dictionary[word.id] = \
                 [word.base_word, word.translated_word, base_language, foreign_language]
 
         return main_dictionary
+
+    @staticmethod
+    def show_languages(word_id: int, row_value: str) -> list or False:
+        """
+
+        :param word_id: Current word id
+        :param row_value: This value depends of currently editing value 'base_language' or 'foreign_language'.
+
+        :return: List with all available languages, without opposite
+            (like, base_language is "Polish" in foreign_language list user can't see and pick "Polish")
+                or False when row_value is wrong.
+        """
+
+        session = Manual_Translate._session
+
+        languages_record = session.query(Language).all()
+
+        word_record = session.query(Word).filter(Word.id == word_id).first()
+
+        languages_list = []
+
+        for language in languages_record:
+            if row_value == "base_language":
+                if language.id != word_record.base_language_id:
+                    languages_list.append(language.name)
+
+            elif row_value == "foreign_language":
+                if language.id != word_record.foreign_language_id:
+                    languages_list.append(language.name)
+
+            else:
+                return False
+
+        return languages_list
 
 
 class Automatic_Translate(Manual_Translate):

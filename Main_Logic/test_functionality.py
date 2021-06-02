@@ -5,7 +5,7 @@ from Main_Logic import Manual_Translate, Automatic_Translate, Language, Base
 import os
 
 
-# LITERY ZARAZ PO 'TEST' ODPOWIADAJĄ ZA KOLEJNOŚĆ WYKONYWANIA METOD W TESTACH
+# LETTERS IMMEDIATELY AFTER "TEST" RESPONSIBLE FOR SEQUENCE OF METHODS IN TESTS
 class TestManual_Translate(TestCase):
     Engine = create_engine("sqlite:///Test.db")
 
@@ -66,7 +66,13 @@ class TestManual_Translate(TestCase):
 
         self.assertIsInstance(self.manual.display_words_list(), dict)
 
-    def test_f_delete_word(self) -> None:
+    def test_f_show_languages(self) -> None:
+        row_value = "foreign_language"
+        word_id = 1
+
+        self.assertIsInstance(self.manual.show_languages(word_id, row_value), list)
+
+    def test_g_delete_word(self) -> None:
         data_for_del = "Bogdan".title()
 
         self.assertEqual(self.manual.delete_word(data_for_del), data_for_del)
