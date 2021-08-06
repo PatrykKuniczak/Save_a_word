@@ -2,6 +2,8 @@ from Main_Logic import Word, Session, Language
 from sqlalchemy import or_
 
 
+# TODO: DOPISZ FUNKCJĘ WSZĘDZIE, ŻE JEŚLI NIE MA 1 ARGUMENTU TO NIE IDZIE DALEJ POP UP PO STRONIE GUI
+
 class Manual_Translate:
     _session = Session
 
@@ -28,7 +30,6 @@ class Manual_Translate:
 
         :return: List [base_word/ None, translated_word/ None] or False.
         """
-
         base_word = base_word.title()
         translated_word = translated_word.title()
 
@@ -211,11 +212,3 @@ class Manual_Translate:
 
 class Automatic_Translate(Manual_Translate):
     pass
-#     def __init__(self, base_language_id: int, foreign_language_id: int):
-#         super().__init__(base_language_id, foreign_language_id)
-#         self.dictionary = PyDictionary()
-#
-#     def add_word(self, base_word: str, **kwargs) -> list[str or None, str or None] or False:
-#         language_record = self.session.query(Language).filter(Language.id == self.foreign_language_id).first()
-#
-#         super().add_word(base_word, translated_word)

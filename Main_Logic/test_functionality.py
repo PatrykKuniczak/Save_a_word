@@ -42,12 +42,6 @@ class TestManual_Translate(TestCase):
         self.assertEqual(self.manual.add_word(base_word, translated_word), [base_word, translated_word])
         self.assertEqual(self.manual.add_word(base_word2, translated_word2), [base_word2, translated_word2])
 
-    # def test_b_automatic_add_word(self) -> None:
-    #
-    #     base_word = "Jabłko".title()
-    #
-    #     self.assertEqual(self.automatic.add_word(base_word), [base_word, "Apple"])
-
     def test_c_edit_word(self) -> None:
         old_value = "Jaśko".title()
         new_value = "Bogdan".title()
